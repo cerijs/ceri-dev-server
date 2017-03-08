@@ -3,7 +3,7 @@
 ceri-dev-server is a small development server for building `custom elements` with ceriJS. 
 It takes different environments and makes them available in your browser.
 
-Additionally it can create a static version for ghpages
+Additionally it can create a static version for ghpages or perform unit tests
 
 
 ### Install
@@ -19,11 +19,16 @@ Usage: ceri-dev-server [options]
 
   Options:
 
-  -h, --help           output usage information
-  -V, --version        output the version number
-  -p, --port <number>  port to use (default: 8080)
-  -f, --folder <path>  root path (default: dev)
-  -s, --static <path>  exports a static version
+    -h, --help               output usage information
+    -V, --version            output the version number
+    -p, --port <number>      port to use (default: 8080)
+    -f, --folder <path>      root path (default: dev)
+    -s, --static <path>      exports a static version (for ghpages)
+    -e, --extensions <list>  extensions to match (default: js,coffee)
+    -t, --test               runs karma on the folder
+    -w, --watch              only with --test, runs karma in watch mode
+    --browsers <list>        only with --test, sets browsers
+
 ```
 
 ### Setting up an environment
@@ -65,10 +70,10 @@ module:
     }
   ]
 ```
-If you need you own, put a webpack.config.js /.coffee/.json in the `dev` folder, it will get merged.
+If you need you own, put a webpack.config.js /.coffee/.json in the project folder, it will get merged for the dev server as well as for karma.
 
 ### Additional info
- - You can create a npm script in your `package.json`, `"scripts": {"dev": "ceri-dev-server"}`. Then you can call it by `npm run dev`
+ - You can create a npm script in your `package.json`, `"scripts": {"dev": "ceri-dev-server", "test": "ceri-dev-server --test"}`. Then you can call it by `npm run dev` or `npm test`
 
 ## License
 Copyright (c) 2017 Paul Pflugradt
