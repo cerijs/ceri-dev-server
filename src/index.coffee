@@ -50,7 +50,7 @@ module.exports = (options) ->
     watch: false
     }, options
   options.workingDir = resolvePath(options.folder)
-  options.static = resolvePath(options.static) if options.static
+  options.static = path.resolve(options.static) if options.static
   if options.test
     cfg = getKarmaCfg(options)
     unless cfg.files
