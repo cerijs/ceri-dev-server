@@ -83,6 +83,7 @@ module.exports = (options) ->
         context: options.workingDir
       }
     if options.static
+      require("mkdirp").sync(options.static)
       webpack = require "webpack"
       compiler = webpack(webconf)
       compiler.run (err, stats) ->

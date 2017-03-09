@@ -1,11 +1,12 @@
 HtmlWebpackPlugin = require('html-webpack-plugin')
+UglifyJSPlugin = require "uglifyjs-webpack-plugin"
 path = require "path"
 webpack = require "webpack"
 module.exports = (options) -> {
   entry: {}
-  devtool: if !options.static then "cheap-eval-source-map" else "source-map"
+  devtool: "source-map"#if !options.static then "cheap-eval-source-map" else "source-map"
   output:
-    publicPath: "/"
+    publicPath: ""
     filename: "[name]_bundle.js"
   module:
     rules: [
@@ -40,7 +41,7 @@ module.exports = (options) -> {
     ]
   plugins: [
     new webpack.DefinePlugin "process.env.NODE_ENV": JSON.stringify(if !options.static then "development" else "production")
-    new webpack.optimize.UglifyJsPlugin
+    new UglifyJSPlugin
       compress:
         dead_code: true
         warnings: false

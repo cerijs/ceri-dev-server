@@ -40,16 +40,12 @@ startupRouter = ->
   views["/"] = nav
   routes["/"] = true
   listen()
-require("document-register-element/pony")(global,'force')
-startupRouter()
-# polyfillCE = ->
-#   require.ensure([],((require) ->
-#     require("document-register-element/pony")(global,'force')
-#     startupRouter()
-#   ),"cePoly")
-# unless window.customElements?
-#   polyfillCE()
-# else
-#   # always use polyfill to be ES5 compilant
-#   # startupRouter()
-#   polyfillCE()
+polyfillCE = ->
+  require.ensure([],((require) ->
+    require("document-register-element")
+    startupRouter()
+  ),"cePoly")
+unless window.customElements?
+  polyfillCE()
+else
+  startupRouter()
