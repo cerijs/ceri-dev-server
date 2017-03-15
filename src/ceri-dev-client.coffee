@@ -29,7 +29,7 @@ startupRouter = ->
       view = views[current]
     else
       view = routes[current]
-      name = "ce#{current.replace('/','-')}"
+      name = "ce#{current.replace('/','-').replace(/([^-])([A-Z])/g, '$1-$2').toLowerCase()}"
       window.customElements.define name, view
       view = document.createElement(name)
       views[current] = view

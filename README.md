@@ -59,18 +59,34 @@ This is the default loaders list:
 ```coffee
 module:
   rules: [
-    { test: /\.html$/, use: "html-loader"}
-    { test: /\.coffee$/, use: "coffee-loader"}
-    { test: /\.css$/, use: ["style-loader","css-loader"] }
-    {
-      test: /\.(js|coffee)$/
-      use: "ceri-loader"
-      enforce: "post"
-      exclude: /node_modules/
-    }
+      { test: /\.woff(\d*)\??(\d*)$/, use: "url-loader?limit=10000&mimetype=application/font-woff" }
+      { test: /\.ttf\??(\d*)$/,    use: "file-loader" }
+      { test: /\.eot\??(\d*)$/,    use: "file-loader" }
+      { test: /\.svg\??(\d*)$/,    use: "file-loader" }
+      { test: /\.css$/, use: ["style-loader","css-loader"] }
+      { test: /\.scss$/, use: ["style-loader","css-loader","sass-loader"]}
+      { test: /\.styl$/, use: ["style-loader","css-loader","stylus-loader"]}
+      { test: /\.html$/, use: "html-loader"}
+      { test: /\.coffee$/, use: "coffee-loader"}
+      {
+        test: /\.(js|coffee)$/
+        use: "ceri-loader"
+        enforce: "post"
+        exclude: /node_modules/
+      }
   ]
 ```
 If you need you own, put a webpack.config.js /.coffee/.json in the project folder, it will get merged for the dev server as well as for karma.
+
+Not all of the loaders are marked as a dependency, if you want to use them you need to install them:
+```sh
+# coffee
+npm install --save-dev coffee-script coffee-loader
+# sass
+npm install --save-dev node-sass sass-loader
+# stylus
+npm install --save-dev stylus stylus-loader
+```
 
 ### Additional info
  - You can create a npm script in your `package.json`, `"scripts": {"dev": "ceri-dev-server", "test": "ceri-dev-server --test"}`. Then you can call it by `npm run dev` or `npm test`

@@ -10,9 +10,15 @@ module.exports = (options) -> {
     filename: "[name]_bundle.js"
   module:
     rules: [
+      { test: /\.woff(\d*)\??(\d*)$/, use: "url-loader?limit=10000&mimetype=application/font-woff" }
+      { test: /\.ttf\??(\d*)$/,    use: "file-loader" }
+      { test: /\.eot\??(\d*)$/,    use: "file-loader" }
+      { test: /\.svg\??(\d*)$/,    use: "file-loader" }
+      { test: /\.css$/, use: ["style-loader","css-loader"] }
+      { test: /\.scss$/, use: ["style-loader","css-loader","sass-loader"]}
+      { test: /\.styl$/, use: ["style-loader","css-loader","stylus-loader"]}
       { test: /\.html$/, use: "html-loader"}
       { test: /\.coffee$/, use: "coffee-loader"}
-      { test: /\.css$/, use: ["style-loader","css-loader"] }
       {
         test: /ceri-dev-client/
         enforce: "post" 
