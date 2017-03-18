@@ -1,3 +1,4 @@
+container = document.getElementById "container"
 startupRouter = ->
   clearSlashes = (path)  ->
     return path.toString().replace(/\/$/, '').replace(/^\//, '')
@@ -24,7 +25,7 @@ startupRouter = ->
     unless routes[current]?
       current = defaultRoute
       window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + defaultRoute
-    document.body.removeChild(view) if view?
+    container.removeChild(view) if view?
     if views[current]?
       view = views[current]
     else
@@ -33,7 +34,7 @@ startupRouter = ->
       window.customElements.define name, view
       view = document.createElement(name)
       views[current] = view
-    document.body.appendChild(view)
+    container.appendChild(view)
   nav = document.createElement "ul"
   for routename, val of routes
     nav.innerHTML += "<li><a href='##{routename}'>#{routename}</a></li>"
