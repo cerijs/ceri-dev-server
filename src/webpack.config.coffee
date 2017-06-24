@@ -1,10 +1,11 @@
 HtmlWebpackPlugin = require('html-webpack-plugin')
-UglifyJSPlugin = require "uglifyjs-webpack-plugin"
+BabiliPlugin = require("babili-webpack-plugin")
+ExtractTextPlugin = require("extract-text-webpack-plugin")
 path = require "path"
 webpack = require "webpack"
 module.exports = (options) -> {
   entry: {}
-  devtool: "source-map"#if !options.static then "cheap-eval-source-map" else "source-map"
+  devtool: if !options.static then "cheap-module-eval-source-map" else "source-map"
   output:
     publicPath: ""
     filename: "[name]_bundle.js"
@@ -14,9 +15,18 @@ module.exports = (options) -> {
       { test: /\.ttf\??(\d*)$/,    use: "file-loader" }
       { test: /\.eot\??(\d*)$/,    use: "file-loader" }
       { test: /\.svg\??(\d*)$/,    use: "file-loader" }
-      { test: /\.css$/, use: ["style-loader","css-loader"] }
-      { test: /\.scss$/, use: ["style-loader","css-loader","sass-loader"]}
-      { test: /\.styl$/, use: ["style-loader","css-loader","stylus-loader"]}
+      { test: /\.css$/, use: ExtractTextPlugin.extract({
+        fallback: "style-loader",
+        use: ["css-loader"] })
+        }
+      { test: /\.scss$/, use: ExtractTextPlugin.extract({
+        fallback: "style-loader",
+        use: ["css-loader","sass-loader"]})
+        }
+      { test: /\.styl$/, use: ExtractTextPlugin.extract({
+        fallback: "style-loader",
+        use: ["css-loader","stylus-loader"]})
+        }
       { test: /\.html$/, use: "html-loader"}
       { test: /\.coffee$/, use: "coffee-loader"}
       {
@@ -47,16 +57,14 @@ module.exports = (options) -> {
     ]
   plugins: [
     new webpack.DefinePlugin "process.env.NODE_ENV": JSON.stringify(if !options.static then "development" else "production")
-    new UglifyJSPlugin
-      compress:
-        dead_code: true
-        warnings: false
-      mangle: !!options.static
-      beautify: !options.static
-      sourceMap: true
+    new BabiliPlugin {},
+      test: if options.static then /.js$/i else /\.not\.js$/i
     new HtmlWebpackPlugin
       filename: 'index.html'
       template: path.resolve(options.libDir,"../index.html")
       inject: true
+    new ExtractTextPlugin("styles.css")
   ]
+  watchOptions:
+    aggregateTimeout: 500
 }

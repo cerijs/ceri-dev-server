@@ -68,7 +68,7 @@ module.exports = (options) ->
       webpackCfg = getWebpackCfg(options)
     karma = require "karma"
     cfg = karma.config.parseConfig path.resolve(options.libDir,"karma.config#{ext}"), cfg
-    cfg.webpack = merge(cfg.webpack,webpackCfg)
+    cfg.webpack = merge {resolveLoader: modules:[ options.modulesDir ]}, cfg.webpack,webpackCfg
     server = new karma.Server cfg
     server.start()
   else
@@ -98,9 +98,10 @@ module.exports = (options) ->
       koa.use require("koa-static")(options.workingDir,index:false)
       koa.use koaHotDevWebpack(webconf)
       chokidar = require "chokidar"
-      chokidar.watch(options.libDir,ignoreInitial: true)
-      .on "all", (event, path) ->
-        koaHotDevWebpack.invalidate()
+      if ext == ".coffee"
+        chokidar.watch(options.libDir,ignoreInitial: true)
+        .on "all", (event, path) ->
+          koaHotDevWebpack.invalidate()
       chokidar.watch(options.workingDir,ignoreInitial: true)
       .on "add", (event, path) ->
         koaHotDevWebpack.invalidate()

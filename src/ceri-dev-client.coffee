@@ -1,3 +1,4 @@
+require("es6-promise/auto")
 container = document.getElementById "container"
 startupRouter = ->
   clearSlashes = (path)  ->
@@ -41,12 +42,15 @@ startupRouter = ->
   views["/"] = nav
   routes["/"] = true
   listen()
-polyfillCE = ->
+unless window.customElements?
   require.ensure([],((require) ->
+    console.log __webpack_require__
     require("document-register-element")
+    
     startupRouter()
   ),"cePoly")
-unless window.customElements?
-  polyfillCE()
 else
   startupRouter()
+
+# hot reloading
+# if process.env.NODE_ENV != "production" and module?.hot
