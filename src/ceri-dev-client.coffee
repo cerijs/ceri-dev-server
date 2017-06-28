@@ -44,9 +44,7 @@ startupRouter = ->
   listen()
 unless window.customElements?
   require.ensure([],((require) ->
-    console.log __webpack_require__
     require("document-register-element")
-    
     startupRouter()
   ),"cePoly")
 else

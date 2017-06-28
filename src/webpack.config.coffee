@@ -3,7 +3,10 @@ BabiliPlugin = require("babili-webpack-plugin")
 ExtractTextPlugin = require("extract-text-webpack-plugin")
 path = require "path"
 webpack = require "webpack"
-module.exports = (options) -> {
+fs = require "fs"
+
+module.exports = (options) -> 
+  return {
   entry: {}
   devtool: if !options.static then "cheap-module-eval-source-map" else "source-map"
   output:
@@ -53,7 +56,8 @@ module.exports = (options) -> {
       "web_modules"
       "node_loaders"
       "node_modules"
-      options.modulesDir
+      path.resolve(options.pkgDir, "./node_modules")
+      path.resolve(fs.realpathSync(options.pkgDir),"..")
     ]
   plugins: [
     new webpack.DefinePlugin "process.env.NODE_ENV": JSON.stringify(if !options.static then "development" else "production")
@@ -64,6 +68,7 @@ module.exports = (options) -> {
       template: path.resolve(options.libDir,"../index.html")
       inject: true
     new ExtractTextPlugin("styles.css")
+    new webpack.optimize.ModuleConcatenationPlugin()
   ]
   watchOptions:
     aggregateTimeout: 500

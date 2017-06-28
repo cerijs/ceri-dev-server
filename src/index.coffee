@@ -43,7 +43,7 @@ module.exports = (options) ->
     ext: ext
     ip: ip.address()
     libDir: __dirname
-    modulesDir: resolvePath(__dirname,"../node_modules")
+    pkgDir: resolvePath(__dirname, "..")
     cwd: process.cwd()
     static: ""
     test: false
@@ -61,14 +61,10 @@ module.exports = (options) ->
     cfg.autoWatch ?= options.watch == true
     cfg.singleRun ?= options.watch != true
     cfg.browsers = options.browsers if options.browsers
-    if cfg.webpack?
-      webpackCfg = cfg.webpack
-      delete cfg.webpack
-    else
-      webpackCfg = getWebpackCfg(options)
+    webpackCfg = getWebpackCfg(options)
     karma = require "karma"
     cfg = karma.config.parseConfig path.resolve(options.libDir,"karma.config#{ext}"), cfg
-    cfg.webpack = merge {resolveLoader: modules:[ options.modulesDir ]}, cfg.webpack,webpackCfg
+    cfg.webpack = merge cfg.webpack,webpackCfg
     server = new karma.Server cfg
     server.start()
   else
