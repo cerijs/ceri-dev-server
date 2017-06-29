@@ -24,14 +24,6 @@
     "cli.js",
     "index.html"
   ],
-  "peerDependencies": {
-    "style-loader": "^0.18.2",
-    "url-loader": "^0.5.9",
-    "ceri-loader": "^1.1.0",
-    "css-loader": "^0.28.4",
-    "file-loader": "^0.11.2",
-    "html-loader": "^0.4.5"
-  },
   "dependencies": {
     "babili-webpack-plugin": "^0.1.2",
     "ceri": "^1.0.18",
