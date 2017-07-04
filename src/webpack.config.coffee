@@ -6,30 +6,42 @@ webpack = require "webpack"
 fs = require "fs"
 
 module.exports = (options) -> 
+  plugins = []
+  if options.test
+    env = "test"
+  else if options.static
+    env = "production"
+  else
+    env = "development"
+  plugins.push new webpack.DefinePlugin "process.env.NODE_ENV": JSON.stringify(env)
+  plugins.push new BabiliPlugin if options.static
+  unless options.test
+    plugins.push new HtmlWebpackPlugin
+      filename: 'index.html'
+      template: path.resolve(options.libDir,"../index.html")
+      inject: true
+    plugins.push new ExtractTextPlugin("styles.css")
+    plugins.push new webpack.optimize.ModuleConcatenationPlugin()
+  getStyleLoader = (name) ->
+    loaders = ["css-loader"]
+    unless name == "css"
+      loaders.push "#{name}-loader"
+    unless options.test
+      return ExtractTextPlugin.extract {fallback: "style-loader", use: loaders}
+    else
+      loaders.unshift("style-loader")
+      return loaders
   return {
-  entry: {}
   devtool: if !options.static then "cheap-module-eval-source-map" else "source-map"
-  output:
-    publicPath: ""
-    filename: "[name]_bundle.js"
   module:
     rules: [
       { test: /\.woff(\d*)\??(\d*)$/, use: "url-loader?limit=10000&mimetype=application/font-woff" }
       { test: /\.ttf\??(\d*)$/,    use: "file-loader" }
       { test: /\.eot\??(\d*)$/,    use: "file-loader" }
       { test: /\.svg\??(\d*)$/,    use: "file-loader" }
-      { test: /\.css$/, use: ExtractTextPlugin.extract({
-        fallback: "style-loader",
-        use: ["css-loader"] })
-        }
-      { test: /\.scss$/, use: ExtractTextPlugin.extract({
-        fallback: "style-loader",
-        use: ["css-loader","sass-loader"]})
-        }
-      { test: /\.styl$/, use: ExtractTextPlugin.extract({
-        fallback: "style-loader",
-        use: ["css-loader","stylus-loader"]})
-        }
+      { test: /\.css$/, use: getStyleLoader("css") }
+      { test: /\.scss$/, use: getStyleLoader("sass") }
+      { test: /\.styl$/, use: getStyleLoader("stylus") }
       { test: /\.html$/, use: "html-loader"}
       { test: /\.coffee$/, use: "coffee-loader"}
       {
@@ -59,17 +71,7 @@ module.exports = (options) ->
       path.resolve(options.pkgDir, "./node_modules")
       path.resolve(fs.realpathSync(options.pkgDir),"..")
     ]
-  plugins: [
-    new webpack.DefinePlugin "process.env.NODE_ENV": JSON.stringify(if !options.static then "development" else "production")
-    new BabiliPlugin {},
-      test: if options.static then /.js$/i else /\.not\.js$/i
-    new HtmlWebpackPlugin
-      filename: 'index.html'
-      template: path.resolve(options.libDir,"../index.html")
-      inject: true
-    new ExtractTextPlugin("styles.css")
-    new webpack.optimize.ModuleConcatenationPlugin()
-  ]
+  plugins: plugins
   watchOptions:
     aggregateTimeout: 500
 }

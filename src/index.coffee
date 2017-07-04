@@ -8,7 +8,7 @@ if ext == ".coffee"
   require "coffee-script/register"
 
 fstools = require "./fstools"
-
+karma = null
 
 resolvePath = (args...)->
   tmp = path.resolve.apply(null,args)
@@ -16,24 +16,54 @@ resolvePath = (args...)->
     throw new Error "#{tmp} doesn't exist or is no directory"
   return tmp
 
-getWebpackCfg = (options) ->
+getLocalWebpackCfg = (options) ->
   for dir in ["cwd","workingDir"]
     for extension in ["coffee","js","json"]
-      filename = "#{options.cwd}/webpack.config.#{extension}"
+      filename = "#{options[dir]}/webpack.config.#{extension}"
       if fstools.isFile(filename)
         if extension == "coffee"
           require "coffee-script/register"
         return require filename
   return {}
 
-getKarmaCfg = (options) ->
-  karma = require "karma"
+getWebpackCfg = (options) ->
+  localWebpackCfg = getLocalWebpackCfg(options)
+  entry = if options.test then {} else {
+    entry:
+      index: ["#{options.libDir}/ceri-dev-client#{ext}"]
+    output:
+      path: options.static + "/"
+      publicPath: ""
+      filename: "[name]_bundle.js"
+    }
+
+  return merge require("#{options.libDir}/webpack.config")(options), entry, localWebpackCfg, {
+      context: options.workingDir
+    }
+
+getLocalKarmaCfg = (options) ->
   for dir in ["cwd","workingDir"]
     for extension in ["coffee","js"]
       filename = "#{options[dir]}/karma.conf.#{extension}"
       if fstools.isFile(filename)
+        if extension == "coffee"
+          require "coffee-script/register"
         return karma.config.parseConfig(filename)
   return {}
+
+getKarmaCfg = (options) ->
+  localCfg = getLocalKarmaCfg(options)
+  unless localCfg.files
+    files = options.workingDir+"/**/*.+(#{options.extensions.join("|")})"
+    localCfg.files = [files]
+    localCfg.preprocessors = {}
+    localCfg.preprocessors[files] = ["webpack"]
+  localCfg.autoWatch ?= options.watch == true
+  localCfg.singleRun ?= options.watch != true
+  localCfg.browsers = options.browsers if options.browsers
+  cfg = karma.config.parseConfig path.resolve(options.libDir,"karma.config#{ext}"), localCfg
+  cfg.webpack = merge getWebpackCfg(options), cfg.webpack
+  return cfg
 
 module.exports = (options) ->
   options = Object.assign {
@@ -52,32 +82,11 @@ module.exports = (options) ->
   options.workingDir = resolvePath(options.folder)
   options.static = path.resolve(options.static) if options.static
   if options.test
-    cfg = getKarmaCfg(options)
-    unless cfg.files
-      files = options.workingDir+"/**/*.+(#{options.extensions.join("|")})"
-      cfg.files = [files]
-      cfg.preprocessors = {}
-      cfg.preprocessors[files] = ["webpack"]
-    cfg.autoWatch ?= options.watch == true
-    cfg.singleRun ?= options.watch != true
-    cfg.browsers = options.browsers if options.browsers
-    webpackCfg = getWebpackCfg(options)
     karma = require "karma"
-    cfg = karma.config.parseConfig path.resolve(options.libDir,"karma.config#{ext}"), cfg
-    cfg.webpack = merge cfg.webpack,webpackCfg
-    server = new karma.Server cfg
+    server = new karma.Server getKarmaCfg(options)
     server.start()
   else
     webconf = getWebpackCfg(options)
-    webconf = merge require("#{options.libDir}/webpack.config")(options), {
-      entry:
-        index: ["#{options.libDir}/ceri-dev-client#{ext}"]
-      output:
-        path: options.static + "/"
-      },
-      webconf, {
-        context: options.workingDir
-      }
     if options.static
       require("mkdirp").sync(options.static)
       webpack = require "webpack"
