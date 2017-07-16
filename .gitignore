@@ -6,3 +6,4 @@ lib/*.js
 .vscode
 static
 test/index.js
+shrinkwrap.yaml
