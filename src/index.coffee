@@ -57,7 +57,7 @@ getKarmaCfg = (options) ->
     files = options.workingDir+"/**/*.+(#{options.extensions.join("|")})"
     localCfg.files = [files]
     localCfg.preprocessors = {}
-    localCfg.preprocessors[files] = ["webpack"]
+    localCfg.preprocessors[files] = ["webpack", "sourcemap"]
   localCfg.autoWatch ?= options.watch == true
   localCfg.singleRun ?= options.watch != true
   localCfg.browsers = options.browsers if options.browsers

@@ -64,6 +64,7 @@
     "chai-webdriverio": "^0.4.1",
     "coffee-loader": "^0.7.3",
     "coffee-script": "^1.12.6",
+    "karma-sourcemap-loader": "^0.3.7",
     "nodemon": "^1.11.0",
     "rimraf": "^2.6.1",
     "script-runner": "^0.1.7",

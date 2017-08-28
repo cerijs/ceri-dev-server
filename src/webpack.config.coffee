@@ -32,7 +32,7 @@ module.exports = (options) ->
       loaders.unshift("style-loader")
       return loaders
   return {
-  devtool: if !options.static then "cheap-module-eval-source-map" else "source-map"
+  devtool: if !options.static then "inline-source-map" else "source-map"
   module:
     rules: [
       { test: /\.woff(\d*)\??(\d*)$/, use: "url-loader?limit=10000&mimetype=application/font-woff" }

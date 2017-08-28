@@ -11,5 +11,6 @@ module.exports = (config) ->
       require("karma-mocha")
       require("karma-webpack")
       require("karma-ceri")
+      require("karma-sourcemap-loader")
     ]
     browsers: ["Chromium","Firefox"]
