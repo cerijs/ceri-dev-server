@@ -1,7 +1,7 @@
 {
   "name": "ceri-dev-server",
   "description": "a small development server for building ceri components",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "homepage": "https://github.com/cerijs",
   "author": {
     "name": "Paul Pflugradt",
