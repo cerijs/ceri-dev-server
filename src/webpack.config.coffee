@@ -5,8 +5,23 @@ path = require "path"
 webpack = require "webpack"
 fs = require "fs"
 
+os = require "os"
+HappyPack = require "happypack"
+happyThreadPool = HappyPack.ThreadPool size: os.cpus().length
+
+
+
 module.exports = (options) -> 
-  plugins = []
+  plugins = [
+    new HappyPack
+      id: "coffee"
+      threadPool: happyThreadPool
+      loaders: [ "coffee-loader" ]
+    new HappyPack
+      id: "ceri"
+      threadPool: happyThreadPool
+      loaders: [ "ceri-loader" ]
+  ]
   if options.test
     env = "test"
   else if options.static
@@ -14,23 +29,35 @@ module.exports = (options) ->
   else
     env = "development"
   plugins.push new webpack.DefinePlugin "process.env.NODE_ENV": JSON.stringify(env)
-  plugins.push new BabiliPlugin if options.static
+  if env == "production"
+    plugins.push new BabiliPlugin 
+    plugins.push new ExtractTextPlugin("styles.css")
+    plugins.push new webpack.optimize.ModuleConcatenationPlugin()
+
   unless options.test
     plugins.push new HtmlWebpackPlugin
       filename: 'index.html'
       template: path.resolve(options.libDir,"../index.html")
       inject: true
-    plugins.push new ExtractTextPlugin("styles.css")
-    plugins.push new webpack.optimize.ModuleConcatenationPlugin()
+    
   getStyleLoader = (name) ->
     loaders = ["css-loader"]
     unless name == "css"
       loaders.push "#{name}-loader"
-    unless options.test
-      return ExtractTextPlugin.extract {fallback: "style-loader", use: loaders}
-    else
+    unless env == "production"
       loaders.unshift("style-loader")
-      return loaders
+      try
+        require.resolve "#{name}-loader"
+      catch
+        return loaders
+      plugins.push new HappyPack
+        id: name
+        threadPool: happyThreadPool
+        loaders: loaders
+      return "happypack/loader?id=#{name}"
+    else
+      return ExtractTextPlugin.extract {fallback: "style-loader", use: loaders}
+      
   return {
   devtool: if !options.static then "inline-source-map" else "source-map"
   module:
@@ -43,7 +70,7 @@ module.exports = (options) ->
       { test: /\.scss$/, use: getStyleLoader("sass") }
       { test: /\.styl$/, use: getStyleLoader("stylus") }
       { test: /\.html$/, use: "html-loader"}
-      { test: /\.coffee$/, use: "coffee-loader"}
+      { test: /\.coffee$/, use: "happypack/loader?id=coffee"}
       {
         test: /ceri-dev-client/
         enforce: "post" 
@@ -52,7 +79,7 @@ module.exports = (options) ->
       }
       {
         test: /\.(js|coffee)$/
-        use: "ceri-loader"
+        use: "happypack/loader?id=ceri"
         enforce: "post"
         exclude: /node_modules/
       }
